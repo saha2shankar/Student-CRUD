@@ -1,9 +1,17 @@
 services:
   - type: web
     name: spring-boot-app
-    env: java
+    env: docker
     plan: free
     branch: main
-    buildCommand: "./mvnw clean package -DskipTests"
-    startCommand: "java -jar target/*.jar"
     autoDeploy: true
+yo render.yaml,  FROM eclipse-temurin:17-jdk-alpine AS build
+WORKDIR /app
+COPY . .
+RUN ./mvnw package -DskipTests
+
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+CMD ["java", "-jar", "app.jar"]
+Dockerfile
